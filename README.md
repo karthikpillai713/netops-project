@@ -115,7 +115,26 @@ docker compose ps
 | Prometheus | http://localhost:9090 |
 | Grafana | http://localhost:3000 |
 
-Grafana requires initial setup of the Prometheus data source at `http://prometheus:9090`. The dashboard is configured separately.
+Grafana requires a Prometheus data source configured with the URL `http://prometheus:9090`.
+
+### Import the Grafana Dashboard
+
+The NETOPS monitoring dashboard is included in this repository at:
+
+`grafana/dashboards/netops-dashboard.json`
+
+To import it:
+
+1. Start the NETOPS environment using `docker compose up -d --build`.
+2. Open Grafana at `http://localhost:3000` and sign in.
+3. Navigate to **Connections → Data sources** and configure Prometheus with the URL `http://prometheus:9090`. Click **Save & test**.
+4. Navigate to **Dashboards → New → Import**.
+5. Upload `grafana/dashboards/netops-dashboard.json`.
+6. If prompted, select the Prometheus data source and complete the import.
+
+**Note:** The dashboard was exported using Grafana's newer resource-style JSON format (`apiVersion`, `kind`, `metadata`, `spec`). Import compatibility may depend on the Grafana version. If the import interface rejects this file, export a classic dashboard JSON from Grafana or use the supported resource import method.
+
+The dashboard contains six panels covering API health, Nginx availability, HTTP request rate, response latency, and HTTP 5xx errors.
 
 ## Network Diagnostics
 
