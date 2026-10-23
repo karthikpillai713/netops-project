@@ -1,0 +1,19 @@
+groups:
+  - name: netops-alerts
+    rules:
+      - alert: NETOPSAPIDown
+        expr: up{job="netops-api"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "NETOPS API is down"
+          description: "Prometheus cannot scrape the NETOPS API for more than 1 minute."
+      - alert: NETOPSReverseProxyDown
+        expr: probe_success{job="netops-nginx"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "NETOPS Nginx reverse proxy is down"
+          description: "Blackbox HTTP probe has failed for more than 1 minute."
