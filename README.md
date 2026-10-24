@@ -230,11 +230,137 @@ The project includes five automated API tests.
 
 NETOPS is intended as a local development and troubleshooting lab. Diagnostic endpoints capable of resolving hosts or testing TCP connections should not be exposed publicly without appropriate access controls and restrictions.
 
+## Phase 2 — Linux Server Networking & Troubleshooting
+
+Phase 2 extends NETOPS beyond Docker containers into Linux server administration, network troubleshooting, service management, firewall configuration, and incident recovery.
+
+The lab uses two Ubuntu Server virtual machines running on Microsoft Hyper-V.
+
+### Infrastructure
+
+| Component | Configuration |
+|---|---|
+| Virtualization | Microsoft Hyper-V |
+| Operating System | Ubuntu Server |
+| VM 1 | netops-server-1 |
+| VM 2 | netops-server-2 |
+| Virtual Network | Hyper-V Default Switch |
+| Web Server | Nginx |
+| Backend | Python HTTP application managed by systemd |
+| Firewall | UFW |
+| Remote Administration | OpenSSH |
+
+The Hyper-V Default Switch provides virtual networking and NAT connectivity. VM addresses are assigned dynamically and may change.
+
+### Linux Networking Diagnostics
+
+Practiced essential Linux networking commands:
+
+- `ip -br addr` — Inspect network interfaces and IP addresses.
+- `ip route` — Examine routing tables and default gateways.
+- `ping` — Test ICMP connectivity.
+- `getent hosts` and `dig` — Investigate DNS resolution.
+- `ss -tulnp` — Identify listening TCP and UDP ports.
+- `curl` — Test HTTP endpoints and response codes.
+- `tcpdump` — Capture and analyze network packets.
+
+These tools were used to investigate connectivity between virtual machines, services, and network interfaces.
+
+### Nginx Reverse Proxy
+
+Configured Nginx on Ubuntu Server 1 to forward HTTP requests to a Python backend.
+
+```text
+Client
+   |
+   | HTTP :80
+   v
+Nginx Reverse Proxy
+   |
+   | HTTP 127.0.0.1:8000
+   v
+Python Backend
+   |
+   v
+/health
+```
+
+The backend runs as a systemd-managed service.
+
+### Firewall Troubleshooting
+
+Configured UFW to manage inbound traffic and performed controlled firewall troubleshooting exercises.
+
+The lab included examining firewall rules, testing allowed and blocked connections, and restoring connectivity after simulated failures.
+
+### Packet Analysis
+
+Used `tcpdump` to observe TCP traffic during normal operation and connectivity failures.
+
+Investigated TCP connection establishment and SYN retransmissions during firewall-related connectivity problems.
+
+### Incident Simulation — HTTP 502 Bad Gateway
+
+Simulated an application outage by stopping the backend service while leaving Nginx running.
+
+Observed:
+
+- Nginx remained active.
+- The backend service became unavailable.
+- HTTP requests returned `502 Bad Gateway`.
+- Network diagnostic checks identified the service failure.
+
+Recovered the application by restarting the backend service and verifying that HTTP requests returned `200 OK`.
+
+### Automated Bash Diagnostics
+
+Created a 92-line Bash troubleshooting script:
+
+`scripts/network-diagnostics.sh`
+
+The script performs six automated checks:
+
+1. External network connectivity.
+2. DNS resolution.
+3. Local TCP connectivity to Nginx.
+4. HTTP health endpoint availability.
+5. Nginx systemd service status.
+6. Backend systemd service status.
+
+It displays PASS/FAIL results, summarizes the number of successful and failed checks, and returns an appropriate exit code.
+
+**Healthy state:**
+
+```text
+Passed: 6
+Failed: 0
+Overall Status: HEALTHY
+Exit Code: 0
+```
+
+**Simulated backend outage:**
+
+```text
+Passed: 4
+Failed: 2
+Overall Status: UNHEALTHY
+Exit Code: 1
+```
+
+The script is intended to run on the Ubuntu Server 1 lab environment, where the required services are configured.
+
+### Skills Demonstrated
+
+Linux networking, DNS troubleshooting, TCP/IP, Nginx, systemd, UFW, tcpdump, Bash scripting, SSH, SCP, incident investigation, and service recovery.
+
+
 ## Project Status
 
-**Phase 1 — Docker Networking and Observability:** Implemented.
+## Project Status
 
-Future expansion includes Linux virtual-machine networking, advanced troubleshooting scenarios, and AWS VPC networking.
+- **Phase 1 — Docker Networking and Observability:** Completed.
+- **Phase 2 — Linux Server Networking and Troubleshooting:** Completed.
+- **Phase 3 — AWS VPC Networking and Cloud Troubleshooting:** Planned.
 
 ## Author
 
