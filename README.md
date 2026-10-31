@@ -353,14 +353,158 @@ The script is intended to run on the Ubuntu Server 1 lab environment, where the 
 
 Linux networking, DNS troubleshooting, TCP/IP, Nginx, systemd, UFW, tcpdump, Bash scripting, SSH, SCP, incident investigation, and service recovery.
 
+## Phase 3 — AWS VPC Networking & Cloud Troubleshooting
 
-## Project Status
+### Overview
+
+Built a custom AWS networking environment to understand cloud networking, routing, security, and troubleshooting.
+
+The infrastructure was deployed in the AWS us-east-1 region.
+
+### AWS Architecture
+
+Internet
+    |
+Internet Gateway
+    |
+VPC (10.20.0.0/16)
+    |
+    |---------------------------|
+    |                           |
+Public Subnet               Private Subnet
+10.20.1.0/24                10.20.2.0/24
+    |                           |
+Ubuntu EC2                  No EC2 Instance
+Nginx Web Server            Local Routing Only
+    |
+Security Group
+HTTP: Port 80
+SSH: Port 22 (Restricted)
+
+### AWS Infrastructure
+
+- Created a custom VPC with public and private subnets.
+- Attached an Internet Gateway to the VPC.
+- Configured a public route table for internet connectivity.
+- Configured the private subnet with local VPC routing only.
+- Launched an Ubuntu 24.04 EC2 instance.
+- Installed and configured Nginx.
+- Configured security group rules for HTTP and SSH.
+- Examined Network ACL inbound and outbound rules.
+- Enabled VPC DNS resolution.
+- Stopped the EC2 instance after testing to reduce costs.
+
+### AWS Network Diagnostics
+
+Created a Bash troubleshooting script:
+
+`scripts/aws-network-check.sh`
+
+The script uses AWS CLI to verify seven networking configurations:
+
+1. EC2 private IP configuration.
+2. Security group HTTP access (TCP 80).
+3. Security group SSH access (TCP 22).
+4. Public route table and Internet Gateway route.
+5. VPC DNS resolution support.
+6. Network ACL inbound rules.
+7. Network ACL outbound rules.
+
+The script also reports EC2 instance state, public IP availability,
+and VPC DNS hostname settings.
+
+**Healthy configuration:**
+
+```text
+Passed: 7
+Failed: 0
+Overall Status: HEALTHY
+Exit Code: 0
+
+
+### AWS Incident Simulations
+
+Three controlled troubleshooting experiments were performed.
+
+#### Incident 1 — Security Group HTTP Outage
+
+**Problem:** Removed the inbound TCP port 80 rule from the EC2 security group.
+
+**Symptoms:**
+- External HTTP requests timed out.
+- The EC2 instance was running, but HTTP traffic could not reach Nginx.
+
+**Investigation:**
+- Checked the security group inbound rules using AWS CLI.
+- Identified the missing HTTP permission.
+
+**Resolution:**
+- Restored the TCP port 80 inbound rule.
+- Verified that HTTP requests returned 200 OK.
+
+#### Incident 2 — Nginx Service Outage
+
+**Problem:** Stopped the Nginx service on the EC2 instance.
+
+**Symptoms:**
+- HTTP requests to the local web server failed.
+- The EC2 instance and security group were functioning.
+
+**Investigation:**
+- Checked Nginx using systemctl.
+- Identified that the service was stopped.
+
+**Resolution:**
+- Restarted Nginx.
+- Verified HTTP 200 responses.
+
+#### Incident 3 — Automated AWS Configuration Failure Detection
+
+**Problem:** Removed the HTTP security group rule while EC2 was stopped.
+
+**Detection:**
+- Executed scripts/aws-network-check.sh.
+- The diagnostic script detected the missing HTTP rule.
+- Results: 6 PASS, 1 FAIL, UNHEALTHY.
+
+**Resolution:**
+- Restored the security group rule.
+- Re-ran the diagnostic script.
+- Results: 7 PASS, 0 FAIL, HEALTHY.
+
+### Automated AWS Testing and CI
+
+Created tests/test_aws_diagnostics.py using pytest and mocked AWS CLI responses.
+
+The automated tests verify:
+
+1. Successful AWS networking configuration validation.
+2. Detection of a missing HTTP security group rule.
+3. Handling of AWS CLI command failures.
+4. Detection of incomplete diagnostic checks.
+
+These tests do not require real AWS credentials or running EC2 instances.
+
+The GitHub Actions CI pipeline performs:
+
+- Five FastAPI application tests.
+- Four AWS diagnostic tests.
+- Docker Compose configuration validation.
+- Prometheus configuration validation.
+
+Latest verified result: 9 tests passed.
+
+### AWS Skills Demonstrated
+
+AWS VPC, public and private subnets, Internet Gateway, route tables,
+EC2, security groups, network ACLs, AWS CLI, Bash scripting,
+network troubleshooting, incident response, pytest, and GitHub Actions.
 
 ## Project Status
 
 - **Phase 1 — Docker Networking and Observability:** Completed.
 - **Phase 2 — Linux Server Networking and Troubleshooting:** Completed.
-- **Phase 3 — AWS VPC Networking and Cloud Troubleshooting:** Planned.
+- **Phase 3 — AWS VPC Networking and Cloud Troubleshooting:** Completed.
 
 ## Author
 
